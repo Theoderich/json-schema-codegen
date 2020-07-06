@@ -6,6 +6,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonPrimitive;
+import de.theo.json.schema.codegen.model.AdditionalProperties;
 import de.theo.json.schema.codegen.model.AllOf;
 import de.theo.json.schema.codegen.model.AnyType;
 import de.theo.json.schema.codegen.model.ArrayType;
@@ -138,7 +139,7 @@ public class JsonSchemaParser {
             }
         }
         if (type.equals("object")) {
-            boolean additionalProperties = getOptionalMemberAsBool(object, "additionalProperties", true);
+            AdditionalProperties additionalProperties = parseAdditionalProperties(object);
             List<String> requiredProperties = getOptionalMemberAsStringArray(object, "required");
             ObjectType objectType = new ObjectType(title, additionalProperties, requiredProperties);
             JsonObject properties = getOptionalMemberAsObject(object, "properties");
@@ -171,6 +172,24 @@ public class JsonSchemaParser {
             return arrayType;
         }
         return null;
+    }
+
+    private AdditionalProperties parseAdditionalProperties(JsonObject object) throws ParseException {
+        JsonElement additionalProperties = object.get("additionalProperties");
+        if(additionalProperties == null){
+            return new AdditionalProperties(true, new AnyType(""));
+        }
+        if(additionalProperties.isJsonPrimitive() && ((JsonPrimitive)additionalProperties).isBoolean()){
+            return new AdditionalProperties(additionalProperties.getAsBoolean(), new AnyType(""));
+        }
+        if(additionalProperties.isJsonObject()){
+            String title = getOptionalMemberAsString(object, "title");
+            if(title == null){
+                title = "";
+            }
+            return new AdditionalProperties(true, parseDefinition(additionalProperties, title));
+        }
+        throw new ParseException("additionalProperties is neither boolean nor object");
     }
 
     private List<String> getOptionalMemberAsStringArray(JsonObject object, String name) throws ParseException {

@@ -8,10 +8,10 @@ public class ObjectType extends BaseType {
 
     private List<BaseType> members;
     private List<PatternType> patternMembers;
-    private boolean additionalMembers;
+    private AdditionalProperties additionalMembers;
     private List<String> requiredMembers;
 
-    public ObjectType(String name, boolean additionalMembers, List<String> requiredMembers) {
+    public ObjectType(String name, AdditionalProperties additionalMembers, List<String> requiredMembers) {
         super(name);
         this.additionalMembers = additionalMembers;
         this.requiredMembers = requiredMembers;
