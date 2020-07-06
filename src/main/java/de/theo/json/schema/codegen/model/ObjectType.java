@@ -1,8 +1,11 @@
 package de.theo.json.schema.codegen.model;
 
+import de.theo.json.schema.codegen.parser.ParseException;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 public class ObjectType extends BaseType {
 
@@ -17,6 +20,17 @@ public class ObjectType extends BaseType {
         this.requiredMembers = requiredMembers;
         this.members = new ArrayList<>();
         this.patternMembers = new ArrayList<>();
+    }
+
+    @Override
+    public void resolveReferences(Map<String, BaseType> refMap) throws ParseException {
+        for (BaseType baseType : this.members) {
+            baseType.resolveReferences(refMap);
+        }
+        for (PatternType member : this.patternMembers) {
+            member.resolveReferences(refMap);
+        }
+        additionalMembers.resolveReferences(refMap);
     }
 
     public List<BaseType> getMembers() {

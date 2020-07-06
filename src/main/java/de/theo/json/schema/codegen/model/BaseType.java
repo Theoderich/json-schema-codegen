@@ -1,6 +1,10 @@
 package de.theo.json.schema.codegen.model;
 
-public class BaseType {
+import de.theo.json.schema.codegen.parser.ParseException;
+
+import java.util.Map;
+
+public abstract class BaseType {
 
     private final String name;
 
@@ -10,6 +14,10 @@ public class BaseType {
 
     public String getName() {
         return name;
+    }
+
+    public void resolveReferences(Map<String, BaseType> refMap) throws ParseException {
+
     }
 
     @Override

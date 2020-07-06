@@ -27,6 +27,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -35,15 +36,17 @@ import java.util.Set;
 public class JsonSchemaParser {
 
     //    private static final String SOURCE_SCHEMA = "/open-rpc-meta-schema.json";
-    private static final String SOURCE_SCHEMA = "/ansible-schema.json";
-
+    private static final String SOURCE_SCHEMA = "/open-rpc-meta-schema.json";
+    private Map<String, BaseType> refMap = new HashMap<>();
 
     public static void main(String[] args) throws IOException, ParseException {
         try (InputStream inputStream = JsonSchemaParser.class.getResourceAsStream(SOURCE_SCHEMA)) {
-            JsonSchemaDocument parse = new JsonSchemaParser().parse(inputStream);
+            JsonSchemaParser jsonSchemaParser = new JsonSchemaParser();
+            JsonSchemaDocument parse = jsonSchemaParser.parse(inputStream);
             System.out.println(parse);
         }
     }
+
 
     public JsonSchemaDocument parse(InputStream in) throws ParseException {
         JsonElement jsonElement = JsonParser.parseReader(new InputStreamReader(in));
@@ -63,22 +66,34 @@ public class JsonSchemaParser {
         if (rootObjectName == null) {
             rootObjectName = "root";
         }
-        BaseType rootClass = parseDefinition(rootObject, rootObjectName);
+        BaseType rootClass = parseDefinition(rootObject, rootObjectName, "#");
         jsonSchemaDocument.setRootClass(rootClass);
 
         if (definitions != null) {
             Set<Map.Entry<String, JsonElement>> entries = requireObject("definitions", definitions).entrySet();
             for (Map.Entry<String, JsonElement> entry : entries) {
                 String name = entry.getKey();
-                BaseType baseType = parseDefinition(entry.getValue(), name);
+                BaseType baseType = parseDefinition(entry.getValue(), name, "#/definitions");
                 jsonSchemaDocument.addDefinition(baseType);
             }
         }
 
+        jsonSchemaDocument.resolveReferences(refMap);
+
         return jsonSchemaDocument;
     }
 
-    private BaseType parseDefinition(JsonElement element, String title) throws ParseException {
+    private BaseType parseDefinition(JsonElement element, String title, String parentRef) throws ParseException {
+        String curRef = parentRef + "/" + title;
+        BaseType result = parseDefinitionInternal(element, title, curRef);
+        if (result != null && !title.isEmpty()) {
+            refMap.put(curRef, result);
+        }
+        return result;
+    }
+
+    private BaseType parseDefinitionInternal(JsonElement element, String title, String curRef) throws ParseException {
+
         if (title.equals("$ref") && element.isJsonPrimitive()) {
             String ref = requireString(title, element);
             return new ReferenceType(title, ref);
@@ -88,7 +103,7 @@ public class JsonSchemaParser {
             ArrayList<BaseType> types = new ArrayList<>();
             while (iterator.hasNext()) {
                 JsonElement next = iterator.next();
-                types.add(parseDefinition(next, ""));
+                types.add(parseDefinition(next, "", curRef));
             }
             if (title.equals("oneOf")) {
                 return new OneOf(title, types);
@@ -139,14 +154,14 @@ public class JsonSchemaParser {
             }
         }
         if (type.equals("object")) {
-            AdditionalProperties additionalProperties = parseAdditionalProperties(object);
+            AdditionalProperties additionalProperties = parseAdditionalProperties(object, curRef);
             List<String> requiredProperties = getOptionalMemberAsStringArray(object, "required");
             ObjectType objectType = new ObjectType(title, additionalProperties, requiredProperties);
             JsonObject properties = getOptionalMemberAsObject(object, "properties");
             if (properties != null) {
                 for (Map.Entry<String, JsonElement> keyValuePair : properties.entrySet()) {
                     String propertyName = keyValuePair.getKey();
-                    BaseType property = parseDefinition(keyValuePair.getValue(), propertyName);
+                    BaseType property = parseDefinition(keyValuePair.getValue(), propertyName, curRef);
                     objectType.addMember(property);
                 }
             }
@@ -154,7 +169,7 @@ public class JsonSchemaParser {
             if (patternProperties != null) {
 
                 for (Map.Entry<String, JsonElement> keyValuePair : patternProperties.entrySet()) {
-                    PatternType patternType = new PatternType(keyValuePair.getKey(), parseDefinition(keyValuePair.getValue(), ""));
+                    PatternType patternType = new PatternType(keyValuePair.getKey(), parseDefinition(keyValuePair.getValue(), "", curRef));
                     objectType.addPatternMember(patternType);
                 }
 
@@ -168,26 +183,26 @@ public class JsonSchemaParser {
             if (items == null) {
                 return arrayType;
             }
-            arrayType.addItem(parseDefinition(items, "item"));
+            arrayType.addItem(parseDefinition(items, "item", curRef));
             return arrayType;
         }
         return null;
     }
 
-    private AdditionalProperties parseAdditionalProperties(JsonObject object) throws ParseException {
+    private AdditionalProperties parseAdditionalProperties(JsonObject object, String curRef) throws ParseException {
         JsonElement additionalProperties = object.get("additionalProperties");
-        if(additionalProperties == null){
+        if (additionalProperties == null) {
             return new AdditionalProperties(true, new AnyType(""));
         }
-        if(additionalProperties.isJsonPrimitive() && ((JsonPrimitive)additionalProperties).isBoolean()){
+        if (additionalProperties.isJsonPrimitive() && ((JsonPrimitive) additionalProperties).isBoolean()) {
             return new AdditionalProperties(additionalProperties.getAsBoolean(), new AnyType(""));
         }
-        if(additionalProperties.isJsonObject()){
+        if (additionalProperties.isJsonObject()) {
             String title = getOptionalMemberAsString(object, "title");
-            if(title == null){
+            if (title == null) {
                 title = "";
             }
-            return new AdditionalProperties(true, parseDefinition(additionalProperties, title));
+            return new AdditionalProperties(true, parseDefinition(additionalProperties, title, curRef));
         }
         throw new ParseException("additionalProperties is neither boolean nor object");
     }

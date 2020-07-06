@@ -1,7 +1,10 @@
 package de.theo.json.schema.codegen.model;
 
+import de.theo.json.schema.codegen.parser.ParseException;
+
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class JsonSchemaDocument {
 
@@ -25,6 +28,13 @@ public class JsonSchemaDocument {
 
     public void addDefinition(BaseType definition) {
         this.definitions.add(definition);
+    }
+
+    public void resolveReferences(Map<String, BaseType> refMap) throws ParseException {
+        this.rootClass.resolveReferences(refMap);
+        for (BaseType definition : this.definitions) {
+            definition.resolveReferences(refMap);
+        }
     }
 
     @Override

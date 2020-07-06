@@ -1,5 +1,9 @@
 package de.theo.json.schema.codegen.model;
 
+import de.theo.json.schema.codegen.parser.ParseException;
+
+import java.util.Map;
+
 public class AdditionalProperties {
 
     private final boolean allowed;
@@ -24,5 +28,9 @@ public class AdditionalProperties {
                 "allowed=" + allowed +
                 ", definition=" + definition +
                 '}';
+    }
+
+    public void resolveReferences(Map<String, BaseType> refMap) throws ParseException {
+        this.definition.resolveReferences(refMap);
     }
 }
