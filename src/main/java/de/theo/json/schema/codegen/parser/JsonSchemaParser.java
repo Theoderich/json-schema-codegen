@@ -154,7 +154,7 @@ public class JsonSchemaParser {
             if (patternProperties != null) {
 
                 for (Map.Entry<String, JsonElement> keyValuePair : patternProperties.entrySet()) {
-                    PatternType patternType = new PatternType(keyValuePair.getKey(), parseDefinition(keyValuePair.getValue(), keyValuePair.getKey()));
+                    PatternType patternType = new PatternType(keyValuePair.getKey(), parseDefinition(keyValuePair.getValue(), ""));
                     objectType.addPatternMember(patternType);
                 }
 
