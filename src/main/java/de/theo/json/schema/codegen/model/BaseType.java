@@ -14,8 +14,6 @@ public class BaseType {
 
     @Override
     public String toString() {
-        return "BaseType{" +
-                "name='" + name + '\'' +
-                '}';
+        return "name='" + name + "'\n";
     }
 }

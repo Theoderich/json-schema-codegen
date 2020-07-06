@@ -31,10 +31,10 @@ public class JsonSchemaDocument {
     public String toString() {
         return "JsonSchemaDocument{" +
                 "schema='" + schema + '\'' +
-                ", id='" + id + '\'' +
-                ", title='" + title + '\'' +
-                ", rootClass=" + rootClass +
-                ", definitions=" + definitions +
+                "\nid='" + id + '\'' +
+                "\ntitle='" + title + '\'' +
+                "\nrootClass=" + rootClass +
+                "\ndefinitions=" + definitions +
                 '}';
     }
 }
