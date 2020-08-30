@@ -1,5 +1,7 @@
 package de.theo.json.schema.codegen.model;
 
+import com.squareup.javapoet.ArrayTypeName;
+import com.squareup.javapoet.TypeName;
 import de.theo.json.schema.codegen.parser.ParseException;
 
 import java.util.ArrayList;
@@ -23,6 +25,19 @@ public class ArrayType extends BaseType {
         for (BaseType item : this.items) {
             item.resolveReferences(refMap);
         }
+    }
+
+    @Override
+    public TypeName toTypeName(String targetPackage) {
+        if(additionalItems || items.size() > 1){
+            return ArrayTypeName.of(TypeName.OBJECT);
+        }
+        return ArrayTypeName.of(items.get(0).toTypeName(targetPackage));
+    }
+
+    @Override
+    public List<BaseType> children() {
+        return new ArrayList<>(items);
     }
 
     public List<BaseType> getItems() {

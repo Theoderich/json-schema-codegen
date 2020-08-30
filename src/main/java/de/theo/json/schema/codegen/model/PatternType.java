@@ -22,6 +22,9 @@ public class PatternType {
         return pattern;
     }
 
+    public BaseType getMembers() {
+        return members;
+    }
 
     @Override
     public String toString() {

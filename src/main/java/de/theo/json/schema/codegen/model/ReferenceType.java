@@ -1,5 +1,6 @@
 package de.theo.json.schema.codegen.model;
 
+import com.squareup.javapoet.TypeName;
 import de.theo.json.schema.codegen.parser.ParseException;
 
 import java.util.Map;
@@ -24,6 +25,11 @@ public class ReferenceType extends BaseType {
         if(this.referencedObject == null){
             throw new ParseException("Could not find referenced object for " +  reference);
         }
+    }
+
+    @Override
+    public TypeName toTypeName(String targetPackage) {
+        return referencedObject.toTypeName(targetPackage);
     }
 
     public String getReference() {

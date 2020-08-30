@@ -37,6 +37,12 @@ public class JsonSchemaDocument {
         }
     }
 
+    public List<BaseType> getAllTypes(){
+        ArrayList<BaseType> result = new ArrayList<>(definitions);
+        result.add(0, rootClass);
+        return result;
+    }
+
     @Override
     public String toString() {
         return "JsonSchemaDocument{" +

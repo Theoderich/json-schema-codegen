@@ -6,6 +6,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonPrimitive;
+import de.theo.json.schema.codegen.generator.JavaCodeGenerator;
 import de.theo.json.schema.codegen.model.AdditionalProperties;
 import de.theo.json.schema.codegen.model.AllOf;
 import de.theo.json.schema.codegen.model.AnyType;
@@ -26,8 +27,10 @@ import de.theo.json.schema.codegen.model.StringType;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -35,7 +38,6 @@ import java.util.Set;
 
 public class JsonSchemaParser {
 
-    //    private static final String SOURCE_SCHEMA = "/open-rpc-meta-schema.json";
     private static final String SOURCE_SCHEMA = "/open-rpc-meta-schema.json";
     private Map<String, BaseType> refMap = new HashMap<>();
 
@@ -43,7 +45,8 @@ public class JsonSchemaParser {
         try (InputStream inputStream = JsonSchemaParser.class.getResourceAsStream(SOURCE_SCHEMA)) {
             JsonSchemaParser jsonSchemaParser = new JsonSchemaParser();
             JsonSchemaDocument parse = jsonSchemaParser.parse(inputStream);
-            System.out.println(parse);
+            JavaCodeGenerator javaCodeGenerator = new JavaCodeGenerator(Paths.get("C:\\projects\\json-schema-codegen\\src\\main\\java"), "de.theo.generated");
+            javaCodeGenerator.generateCode(parse);
         }
     }
 
@@ -156,7 +159,7 @@ public class JsonSchemaParser {
         if (type.equals("object")) {
             AdditionalProperties additionalProperties = parseAdditionalProperties(object, curRef);
             List<String> requiredProperties = getOptionalMemberAsStringArray(object, "required");
-            ObjectType objectType = new ObjectType(title, additionalProperties, requiredProperties);
+            ObjectType objectType = new ObjectType(title, additionalProperties, new HashSet<>(requiredProperties));
             JsonObject properties = getOptionalMemberAsObject(object, "properties");
             if (properties != null) {
                 for (Map.Entry<String, JsonElement> keyValuePair : properties.entrySet()) {

@@ -1,6 +1,6 @@
 package de.theo.json.schema.codegen.model;
 
-public class NumberType extends BaseType {
+public abstract class NumberType extends BaseType {
 
     private Integer multipleOf;
     private Integer minimum;
