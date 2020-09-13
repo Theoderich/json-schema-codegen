@@ -1,6 +1,7 @@
 package de.theo.json.schema.codegen.model;
 
-import com.squareup.javapoet.ArrayTypeName;
+import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import de.theo.json.schema.codegen.parser.ParseException;
 
@@ -29,10 +30,10 @@ public class ArrayType extends BaseType {
 
     @Override
     public TypeName toTypeName(String targetPackage) {
-        if(additionalItems || items.size() > 1){
-            return ArrayTypeName.of(TypeName.OBJECT);
+        if (additionalItems || items.size() > 1) {
+            return ParameterizedTypeName.get(ClassName.get(List.class), TypeName.OBJECT);
         }
-        return ArrayTypeName.of(items.get(0).toTypeName(targetPackage));
+        return ParameterizedTypeName.get(ClassName.get(List.class), items.get(0).toTypeName(targetPackage));
     }
 
     @Override
