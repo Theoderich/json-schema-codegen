@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
@@ -70,6 +71,22 @@ public final class GeneratorUtil {
                 .addModifiers(Modifier.PUBLIC)
                 .addStatement("this.$1L = $1L", propertyName).build();
         typeBuilder.addMethod(getter).addMethod(setter);
+    }
+
+    public static void addToString(TypeSpec.Builder typeBuilder, String typeName){
+        MethodSpec.Builder toStringMethod = MethodSpec.methodBuilder("toString")
+                .addModifiers(Modifier.PUBLIC)
+                .addAnnotation(Override.class)
+                .returns(String.class);
+        StringBuilder sb = new StringBuilder();
+        sb.append("return \"").append(typeName).append(": {\\n\"");
+        for (FieldSpec fieldSpec : typeBuilder.fieldSpecs) {
+            String fieldName = fieldSpec.name.replace("$", "$$");
+            sb.append(" +\n\"").append(fieldName).append(": \" + this.").append(fieldName).append(" + \"\\n\"");
+        }
+        sb.append(" +\n\"}\"");
+        toStringMethod.addStatement(sb.toString());
+        typeBuilder.addMethod(toStringMethod.build());
     }
 
 }

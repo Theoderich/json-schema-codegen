@@ -74,7 +74,9 @@ public class ObjectType extends BaseType implements ModelType {
             } else {
                 GeneratorUtil.addJsonAnyProperty(typeBuilder, TypeName.OBJECT, additionalPropertiesName);
             }
-        } 
+        }
+
+        GeneratorUtil.addToString(typeBuilder, className.simpleName());
 
         TypeSpec typeSpec = typeBuilder.build();
         return JavaFile.builder(targetPackage, typeSpec).build();
