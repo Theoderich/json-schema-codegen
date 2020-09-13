@@ -3,13 +3,16 @@ package de.theo.json.schema.codegen.generator;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.squareup.javapoet.AnnotationSpec;
+import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.MethodSpec;
+import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 
 import javax.lang.model.element.Modifier;
 import java.util.Locale;
+import java.util.Map;
 
 public final class GeneratorUtil {
 
@@ -45,7 +48,7 @@ public final class GeneratorUtil {
     }
 
     public static void addJsonAnyProperty(TypeSpec.Builder typeBuilder, TypeName fieldType, String fieldName){
-        FieldSpec.Builder fieldBuilder = addProperty(typeBuilder, fieldType, fieldName);
+        FieldSpec.Builder fieldBuilder = addProperty(typeBuilder, ParameterizedTypeName.get(ClassName.get(Map.class),ClassName.get(String.class), fieldType), fieldName);
         fieldBuilder.addAnnotation(AnnotationSpec.builder(JsonAnySetter.class).build());
         typeBuilder.addField(fieldBuilder.build());
     }
