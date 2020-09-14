@@ -39,7 +39,7 @@ import java.util.Set;
 public class JsonSchemaParser {
 
     private static final String SOURCE_SCHEMA = "/open-rpc-meta-schema.json";
-    private Map<String, BaseType> refMap = new HashMap<>();
+    protected final Map<String, BaseType> refMap = new HashMap<>();
 
     public static void main(String[] args) throws IOException, ParseException {
         try (InputStream inputStream = JsonSchemaParser.class.getResourceAsStream(SOURCE_SCHEMA)) {
@@ -86,7 +86,7 @@ public class JsonSchemaParser {
         return jsonSchemaDocument;
     }
 
-    private BaseType parseDefinition(JsonElement element, String title, String parentRef) throws ParseException {
+    protected BaseType parseDefinition(JsonElement element, String title, String parentRef) throws ParseException {
         String curRef = parentRef + "/" + title;
         BaseType result = parseDefinitionInternal(element, title, curRef);
         if (result != null && !title.isEmpty()) {
@@ -225,7 +225,7 @@ public class JsonSchemaParser {
     }
 
 
-    private JsonObject getRequiredMemberAsObject(JsonObject object, String name) throws ParseException {
+    protected JsonObject getRequiredMemberAsObject(JsonObject object, String name) throws ParseException {
         JsonObject member = getOptionalMemberAsObject(object, name);
         if (member == null) {
             throw new ParseException("Required member " + name + " not found");
@@ -234,7 +234,7 @@ public class JsonSchemaParser {
     }
 
 
-    private JsonObject getOptionalMemberAsObject(JsonObject object, String name) throws ParseException {
+    protected JsonObject getOptionalMemberAsObject(JsonObject object, String name) throws ParseException {
         JsonElement member = object.get(name);
         if (member == null) {
             return null;
@@ -242,7 +242,24 @@ public class JsonSchemaParser {
         return requireObject(name, member);
     }
 
-    private boolean getOptionalMemberAsBool(JsonObject object, String name, boolean fallback) throws ParseException {
+    protected JsonArray getRequiredMemberAsArray(JsonObject object, String name) throws ParseException {
+        JsonArray member = getOptionalMemberAsArray(object, name);
+        if (member == null) {
+            throw new ParseException("Required member " + name + " not found");
+        }
+        return member;
+    }
+
+
+    protected JsonArray getOptionalMemberAsArray(JsonObject object, String name) throws ParseException {
+        JsonElement member = object.get(name);
+        if (member == null) {
+            return null;
+        }
+        return requireArray(name, member);
+    }
+
+    protected boolean getOptionalMemberAsBool(JsonObject object, String name, boolean fallback) throws ParseException {
         JsonElement member = object.get(name);
         if (member == null) {
             return fallback;
@@ -252,7 +269,15 @@ public class JsonSchemaParser {
     }
 
 
-    private Integer getOptionalMemberAsInteger(JsonObject object, String name) throws ParseException {
+    protected int getRequiredMemberAsInteger(JsonObject object, String name) throws ParseException {
+        Integer member = getOptionalMemberAsInteger(object, name);
+        if (member == null) {
+            throw new ParseException("Required member " + name + " not found");
+        }
+        return member;
+    }
+
+    protected Integer getOptionalMemberAsInteger(JsonObject object, String name) throws ParseException {
         JsonElement member = object.get(name);
         if (member == null) {
             return null;
@@ -261,7 +286,7 @@ public class JsonSchemaParser {
         return requireInt(name, memberPrimitive);
     }
 
-    private String getOptionalMemberAsString(JsonObject object, String name) throws ParseException {
+    protected String getOptionalMemberAsString(JsonObject object, String name) throws ParseException {
         JsonElement member = object.get(name);
         if (member == null) {
             return null;
@@ -270,13 +295,13 @@ public class JsonSchemaParser {
         return requireString(name, memberPrimitive);
     }
 
-    private String getRequiredMemberAsString(JsonObject object, String name) throws ParseException {
+    protected String getRequiredMemberAsString(JsonObject object, String name) throws ParseException {
         JsonElement member = requireMember(object, name);
         JsonPrimitive memberPrimitive = requirePrimitive(name, member);
         return requireString(name, memberPrimitive);
     }
 
-    private JsonElement requireMember(JsonObject object, String name) throws ParseException {
+    protected JsonElement requireMember(JsonObject object, String name) throws ParseException {
         JsonElement member = object.get(name);
         if (member == null) {
             throw new ParseException("Required member " + name + " not found");
@@ -284,21 +309,21 @@ public class JsonSchemaParser {
         return member;
     }
 
-    private JsonPrimitive requirePrimitive(String name, JsonElement member) throws ParseException {
+    protected JsonPrimitive requirePrimitive(String name, JsonElement member) throws ParseException {
         if (!member.isJsonPrimitive()) {
             throw new ParseException("Expected member " + name + " to be a json primitive");
         }
         return member.getAsJsonPrimitive();
     }
 
-    private JsonArray requireArray(String name, JsonElement member) throws ParseException {
+    protected JsonArray requireArray(String name, JsonElement member) throws ParseException {
         if (!member.isJsonArray()) {
             throw new ParseException("Expected member " + name + " to be a json array");
         }
         return member.getAsJsonArray();
     }
 
-    private JsonObject requireObject(String name, JsonElement member) throws ParseException {
+    protected JsonObject requireObject(String name, JsonElement member) throws ParseException {
         if (!member.isJsonObject()) {
             throw new ParseException("Expected member " + name + " to be a json object");
         }
@@ -306,7 +331,7 @@ public class JsonSchemaParser {
     }
 
 
-    private String requireString(String name, JsonElement member) throws ParseException {
+    protected String requireString(String name, JsonElement member) throws ParseException {
         JsonPrimitive memberPrimitive = requirePrimitive(name, member);
         if (!memberPrimitive.isString()) {
             throw new ParseException("Expected member " + name + " to be a string");
@@ -314,14 +339,14 @@ public class JsonSchemaParser {
         return memberPrimitive.getAsString();
     }
 
-    private int requireInt(String name, JsonPrimitive memberPrimitive) throws ParseException {
+    protected int requireInt(String name, JsonPrimitive memberPrimitive) throws ParseException {
         if (!memberPrimitive.isNumber()) {
             throw new ParseException("Expected member " + name + " to be a number");
         }
         return memberPrimitive.getAsInt();
     }
 
-    private boolean requireBool(String name, JsonPrimitive memberPrimitive) throws ParseException {
+    protected boolean requireBool(String name, JsonPrimitive memberPrimitive) throws ParseException {
         if (!memberPrimitive.isBoolean()) {
             throw new ParseException("Expected member " + name + " to be a boolean");
         }
