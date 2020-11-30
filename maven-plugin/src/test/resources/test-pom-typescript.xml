@@ -15,7 +15,7 @@
                     <targetPackage>de.qaware.test</targetPackage>
                     <sourceFolder>src/test/resources/json-schema</sourceFolder>
                     <targetFolder>target/test/generated-sources</targetFolder>
-                    <language>java</language>
+                    <language>typescript</language>
                 </configuration>
             </plugin>
         </plugins>
