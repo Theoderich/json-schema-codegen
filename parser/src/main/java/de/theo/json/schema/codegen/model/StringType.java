@@ -3,8 +3,6 @@ package de.theo.json.schema.codegen.model;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.TypeName;
 
-import java.lang.reflect.Type;
-
 public class StringType extends BaseType {
 
     private Integer minLength;

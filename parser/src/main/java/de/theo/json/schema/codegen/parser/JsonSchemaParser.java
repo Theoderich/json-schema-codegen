@@ -45,7 +45,7 @@ public class JsonSchemaParser {
         try (InputStream inputStream = JsonSchemaParser.class.getResourceAsStream(SOURCE_SCHEMA)) {
             JsonSchemaParser jsonSchemaParser = new JsonSchemaParser();
             JsonSchemaDocument parse = jsonSchemaParser.parse(inputStream);
-            JavaCodeGenerator javaCodeGenerator = new JavaCodeGenerator(Paths.get("C:\\projects\\json-schema-codegen\\src\\main\\java"), "de.theo.generated");
+            JavaCodeGenerator javaCodeGenerator = new JavaCodeGenerator(Paths.get("/home/andreas.janning/Projekt/json-schema-codegen/target/generated-sources"), "de.theo.generated");
             javaCodeGenerator.generateCode(parse);
         }
     }
