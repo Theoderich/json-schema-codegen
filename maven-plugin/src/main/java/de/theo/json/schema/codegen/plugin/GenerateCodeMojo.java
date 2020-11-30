@@ -19,7 +19,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URISyntaxException;
 import java.nio.file.Paths;
 import java.util.List;
 
@@ -77,14 +76,12 @@ public class GenerateCodeMojo extends AbstractMojo {
 
     private FreemarkerCodeGenerator getFreemarkerCodeGenerator() throws MojoExecutionException {
         try {
-            File freemarkerTemplatePath;
             if (language.equals("custom")) {
-                freemarkerTemplatePath = customTemplateFolder;
+                return new FreemarkerCodeGenerator(Paths.get(targetFolder.toURI()), targetPackage, customTemplateFolder);
             } else {
-                freemarkerTemplatePath = new File(GenerateCodeMojo.class.getResource("/freemarker/" + language).toURI());
+                return new FreemarkerCodeGenerator(Paths.get(targetFolder.toURI()), targetPackage, language);
             }
-            return new FreemarkerCodeGenerator(Paths.get(targetFolder.toURI()), targetPackage, freemarkerTemplatePath);
-        } catch (URISyntaxException | IOException e) {
+        } catch (IOException e) {
             throw new MojoExecutionException("unable to load templates", e);
         }
     }

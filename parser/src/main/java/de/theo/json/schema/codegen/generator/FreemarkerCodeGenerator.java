@@ -25,12 +25,21 @@ public class FreemarkerCodeGenerator {
     private final Path basePackagePath;
 
     public FreemarkerCodeGenerator(Path targetPath, String basePackage, File templatesDir) throws IOException {
+        this(targetPath, basePackage);
+        cfg.setDirectoryForTemplateLoading(templatesDir);
+    }
+
+    public FreemarkerCodeGenerator(Path targetPath, String basePackage, String language) throws IOException {
+        this(targetPath, basePackage);
+        cfg.setClassForTemplateLoading(this.getClass(), "/freemarker/" + language);
+    }
+
+    private FreemarkerCodeGenerator(Path targetPath, String basePackage) throws IOException {
         this.targetPath = targetPath;
         this.basePackage = basePackage;
         String packageRelativePath = this.basePackage.replaceAll("\\.", "/");
         basePackagePath = this.targetPath.resolve(packageRelativePath);
         cfg = new Configuration(Configuration.VERSION_2_3_30);
-        cfg.setDirectoryForTemplateLoading(templatesDir);
         cfg.setDefaultEncoding("UTF-8");
         cfg.setTemplateExceptionHandler(TemplateExceptionHandler.RETHROW_HANDLER);
         cfg.setLogTemplateExceptions(false);
