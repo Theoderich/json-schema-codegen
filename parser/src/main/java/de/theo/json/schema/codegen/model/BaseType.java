@@ -1,6 +1,6 @@
 package de.theo.json.schema.codegen.model;
 
-import com.squareup.javapoet.TypeName;
+import de.theo.json.schema.codegen.code.PropertyModel;
 import de.theo.json.schema.codegen.parser.ParseException;
 
 import java.util.Collections;
@@ -27,7 +27,7 @@ public abstract class BaseType {
 
     }
 
-    public abstract TypeName toTypeName(String targetPackage);
+    public abstract PropertyModel toPropertyModel(boolean optional);
 
 
     @Override

@@ -1,8 +1,7 @@
 package de.theo.json.schema.codegen.model;
 
-import com.squareup.javapoet.ClassName;
-import com.squareup.javapoet.ParameterizedTypeName;
-import com.squareup.javapoet.TypeName;
+import de.theo.json.schema.codegen.code.PropertyModel;
+import de.theo.json.schema.codegen.code.TypeModel;
 import de.theo.json.schema.codegen.parser.ParseException;
 
 import java.util.ArrayList;
@@ -29,11 +28,12 @@ public class ArrayType extends BaseType {
     }
 
     @Override
-    public TypeName toTypeName(String targetPackage) {
+    public PropertyModel toPropertyModel(boolean optional) {
         if (additionalItems || items.size() > 1) {
-            return ParameterizedTypeName.get(ClassName.get(List.class), TypeName.OBJECT);
+            return new PropertyModel(TypeModel.REFERENCE, getName(), optional, true);
         }
-        return ParameterizedTypeName.get(ClassName.get(List.class), items.get(0).toTypeName(targetPackage));
+        return new PropertyModel(items.get(0).toPropertyModel(optional).getType(), getName(), optional, true);
+
     }
 
     @Override

@@ -6,7 +6,8 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonPrimitive;
-import de.theo.json.schema.codegen.generator.JavaCodeGenerator;
+import de.theo.json.schema.codegen.code.ClassModel;
+import de.theo.json.schema.codegen.generator.FreemarkerCodeGenerator;
 import de.theo.json.schema.codegen.model.AdditionalProperties;
 import de.theo.json.schema.codegen.model.AllOf;
 import de.theo.json.schema.codegen.model.AnyType;
@@ -23,7 +24,9 @@ import de.theo.json.schema.codegen.model.OneOf;
 import de.theo.json.schema.codegen.model.PatternType;
 import de.theo.json.schema.codegen.model.ReferenceType;
 import de.theo.json.schema.codegen.model.StringType;
+import freemarker.template.TemplateException;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -41,12 +44,17 @@ public class JsonSchemaParser {
     private static final String SOURCE_SCHEMA = "/open-rpc-meta-schema.json";
     private Map<String, BaseType> refMap = new HashMap<>();
 
-    public static void main(String[] args) throws IOException, ParseException {
+    public static void main(String[] args) throws IOException, ParseException, TemplateException {
         try (InputStream inputStream = JsonSchemaParser.class.getResourceAsStream(SOURCE_SCHEMA)) {
             JsonSchemaParser jsonSchemaParser = new JsonSchemaParser();
             JsonSchemaDocument parse = jsonSchemaParser.parse(inputStream);
-            JavaCodeGenerator javaCodeGenerator = new JavaCodeGenerator(Paths.get("/home/andreas.janning/Projekt/json-schema-codegen/target/generated-sources"), "de.theo.generated");
-            javaCodeGenerator.generateCode(parse);
+            List<ClassModel> models = new CodeModelMapper().map(parse);
+
+            FreemarkerCodeGenerator javaCodeGenerator = new FreemarkerCodeGenerator(
+                    Paths.get("/home/andreas.janning/Projekt/json-schema-codegen/parser/target/generated-sources"),
+                    "de.theo.generated",
+                    new File("/home/andreas.janning/Projekt/json-schema-codegen/parser/src/main/resources/freemarker"));
+            javaCodeGenerator.generateCode(models);
         }
     }
 

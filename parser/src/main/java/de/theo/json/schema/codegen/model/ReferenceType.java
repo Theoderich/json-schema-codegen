@@ -1,6 +1,6 @@
 package de.theo.json.schema.codegen.model;
 
-import com.squareup.javapoet.TypeName;
+import de.theo.json.schema.codegen.code.PropertyModel;
 import de.theo.json.schema.codegen.parser.ParseException;
 
 import java.util.Map;
@@ -18,7 +18,7 @@ public class ReferenceType extends BaseType {
     @Override
     public void resolveReferences(Map<String, BaseType> refMap) throws ParseException {
         if(reference.startsWith("http")){
-            this.referencedObject = new AnyType("");
+            this.referencedObject = new AnyType(getName());
         } else {
             this.referencedObject = refMap.get(reference);
         }
@@ -28,8 +28,8 @@ public class ReferenceType extends BaseType {
     }
 
     @Override
-    public TypeName toTypeName(String targetPackage) {
-        return referencedObject.toTypeName(targetPackage);
+    public PropertyModel toPropertyModel(boolean optional) {
+        return referencedObject.toPropertyModel(optional);
     }
 
     public String getReference() {

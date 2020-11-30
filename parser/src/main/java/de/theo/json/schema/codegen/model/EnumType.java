@@ -1,13 +1,10 @@
 package de.theo.json.schema.codegen.model;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.squareup.javapoet.AnnotationSpec;
-import com.squareup.javapoet.ClassName;
-import com.squareup.javapoet.JavaFile;
-import com.squareup.javapoet.TypeSpec;
-import de.theo.json.schema.codegen.generator.GeneratorUtil;
+import de.theo.json.schema.codegen.code.ClassModel;
+import de.theo.json.schema.codegen.code.PropertyModel;
+import de.theo.json.schema.codegen.code.TypeModel;
 
-import javax.lang.model.element.Modifier;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -25,8 +22,8 @@ public class EnumType extends BaseType implements ModelType {
     }
 
     @Override
-    public ClassName toTypeName(String targetPackage) {
-        return ClassName.get(targetPackage, GeneratorUtil.toFirstCharUpper(this.getName()));
+    public PropertyModel toPropertyModel(boolean optional) {
+        return new PropertyModel(TypeModel.REFERENCE, getName(), optional);
     }
 
     @Override
@@ -37,15 +34,7 @@ public class EnumType extends BaseType implements ModelType {
     }
 
     @Override
-    public JavaFile toJavaFile(String targetPackage) {
-        ClassName className = this.toTypeName(targetPackage);
-        TypeSpec.Builder enumBuilder = TypeSpec.enumBuilder(className);
-        enumBuilder.addModifiers(Modifier.PUBLIC);
-        for (String value : enumValues) {
-            AnnotationSpec annotation = AnnotationSpec.builder(JsonProperty.class).addMember("value", GeneratorUtil.asAnnotationValue(value)).build();
-            TypeSpec annotated = TypeSpec.anonymousClassBuilder("").addAnnotation(annotation).build();
-            enumBuilder.addEnumConstant(GeneratorUtil.toEnumValue(value), annotated);
-        }
-        return JavaFile.builder(targetPackage, enumBuilder.build()).build();
+    public ClassModel toClassModel() {
+        return new ClassModel(getName(), new ArrayList<>(enumValues));
     }
 }

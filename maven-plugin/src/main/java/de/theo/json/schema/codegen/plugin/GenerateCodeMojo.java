@@ -1,9 +1,12 @@
 package de.theo.json.schema.codegen.plugin;
 
-import de.theo.json.schema.codegen.generator.JavaCodeGenerator;
+import de.theo.json.schema.codegen.code.ClassModel;
+import de.theo.json.schema.codegen.generator.FreemarkerCodeGenerator;
 import de.theo.json.schema.codegen.model.JsonSchemaDocument;
+import de.theo.json.schema.codegen.parser.CodeModelMapper;
 import de.theo.json.schema.codegen.parser.JsonSchemaParser;
 import de.theo.json.schema.codegen.parser.ParseException;
+import freemarker.template.TemplateException;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.Component;
@@ -16,9 +19,11 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URISyntaxException;
 import java.nio.file.Paths;
+import java.util.List;
 
-@Mojo(name="generate-code")
+@Mojo(name = "generate-code")
 public class GenerateCodeMojo extends AbstractMojo {
 
     @Component
@@ -48,17 +53,28 @@ public class GenerateCodeMojo extends AbstractMojo {
             throw new MojoExecutionException("Unable to process files from input directory.");
         }
 
+
+        CodeModelMapper codeModelMapper = new CodeModelMapper();
+        FreemarkerCodeGenerator javaCodeGenerator = getFreemarkerCodeGenerator();
         for (File file : inputFiles) {
             try (InputStream input = new FileInputStream(file)) {
                 JsonSchemaParser jsonSchemaParser = new JsonSchemaParser();
                 JsonSchemaDocument document = jsonSchemaParser.parse(input);
-                JavaCodeGenerator javaCodeGenerator = new JavaCodeGenerator(Paths.get(targetFolder.toURI()), targetPackage);
-                javaCodeGenerator.generateCode(document);
-            } catch (IOException | ParseException e) {
+                List<ClassModel> classModels = codeModelMapper.map(document);
+                javaCodeGenerator.generateCode(classModels);
+            } catch (IOException | ParseException | TemplateException e) {
                 throw new MojoExecutionException("Unable to generate code, consult the errors and warnings printed above.", e);
             }
         }
 
     }
 
+    private FreemarkerCodeGenerator getFreemarkerCodeGenerator() throws MojoExecutionException {
+        try {
+            File freemarkerTemplatePath = new File(GenerateCodeMojo.class.getResource("/freemarker").toURI());
+            return new FreemarkerCodeGenerator(Paths.get(targetFolder.toURI()), targetPackage, freemarkerTemplatePath);
+        } catch (URISyntaxException | IOException e) {
+            throw new MojoExecutionException("unable to load templates", e);
+        }
+    }
 }

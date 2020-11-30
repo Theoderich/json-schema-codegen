@@ -1,14 +1,11 @@
 package de.theo.json.schema.codegen.model;
 
-import com.squareup.javapoet.ClassName;
-import com.squareup.javapoet.JavaFile;
-import com.squareup.javapoet.NameAllocator;
-import com.squareup.javapoet.TypeName;
-import com.squareup.javapoet.TypeSpec;
-import de.theo.json.schema.codegen.generator.GeneratorUtil;
+import de.theo.json.schema.codegen.code.ClassModel;
+import de.theo.json.schema.codegen.code.PatternPropertyModel;
+import de.theo.json.schema.codegen.code.PropertyModel;
+import de.theo.json.schema.codegen.code.ReferenceModel;
 import de.theo.json.schema.codegen.parser.ParseException;
 
-import javax.lang.model.element.Modifier;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -42,44 +39,27 @@ public class ObjectType extends BaseType implements ModelType {
     }
 
     @Override
-    public ClassName toTypeName(String targetPackage) {
-        return ClassName.get(targetPackage, GeneratorUtil.toFirstCharUpper(this.getName()));
+    public PropertyModel toPropertyModel(boolean optional) {
+        return new PropertyModel(getName(), optional, false, new ReferenceModel("", getName()));
     }
 
-
     @Override
-    public JavaFile toJavaFile(String targetPackage) {
-        ClassName className = this.toTypeName(targetPackage);
-        TypeSpec.Builder typeBuilder = TypeSpec.classBuilder(className);
-        typeBuilder.addModifiers(Modifier.PUBLIC);
-        NameAllocator nameAllocator = new NameAllocator();
+    public ClassModel toClassModel() {
+        List<PropertyModel> properties = new ArrayList<>();
         for (BaseType member : members) {
-            String jsonName = member.getName();
-            String fieldName = nameAllocator.newName(jsonName);
-            TypeName fieldType = member.toTypeName(targetPackage);
-            if(!requiredMembers.contains(jsonName)){
-                fieldType = fieldType.box();
-            }
-            GeneratorUtil.addJsonProperty(typeBuilder, fieldType, fieldName, jsonName);
+            boolean optional = !requiredMembers.contains(member.getName());
+            properties.add(member.toPropertyModel(optional));
         }
-
-        if(additionalMembers.isAllowed() || patternMembers.size() > 0){
-            String additionalPropertiesName = nameAllocator.newName("additionalProperties");
-            if(additionalMembers.isAllowed() && patternMembers.isEmpty()){
-                TypeName fieldType = additionalMembers.getDefinition().toTypeName(targetPackage);
-                GeneratorUtil.addJsonAnyProperty(typeBuilder, fieldType, additionalPropertiesName);
-            } else if (!additionalMembers.isAllowed() && patternMembers.size() == 1) {
-                TypeName fieldType = patternMembers.get(0).getMembers().toTypeName(targetPackage);
-                GeneratorUtil.addJsonAnyProperty(typeBuilder, fieldType, additionalPropertiesName);
-            } else {
-                GeneratorUtil.addJsonAnyProperty(typeBuilder, TypeName.OBJECT, additionalPropertiesName);
-            }
+        PropertyModel additionalProperties = null;
+        if (additionalMembers.isAllowed()) {
+            additionalProperties = additionalMembers.getDefinition().toPropertyModel(true);
         }
-
-        GeneratorUtil.addToString(typeBuilder, className.simpleName());
-
-        TypeSpec typeSpec = typeBuilder.build();
-        return JavaFile.builder(targetPackage, typeSpec).build();
+        List<PatternPropertyModel> patternProperties = new ArrayList<>();
+        for (PatternType patternMember : patternMembers) {
+            PatternPropertyModel patternPropertyModel = new PatternPropertyModel(patternMember.getMembers().toPropertyModel(true).getType(), "", true, patternMember.getPattern());
+            patternProperties.add(patternPropertyModel);
+        }
+        return new ClassModel(getName(), properties, additionalProperties, patternProperties);
     }
 
     @Override

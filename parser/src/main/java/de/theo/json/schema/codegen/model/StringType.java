@@ -1,7 +1,7 @@
 package de.theo.json.schema.codegen.model;
 
-import com.squareup.javapoet.ClassName;
-import com.squareup.javapoet.TypeName;
+import de.theo.json.schema.codegen.code.PropertyModel;
+import de.theo.json.schema.codegen.code.TypeModel;
 
 public class StringType extends BaseType {
 
@@ -21,8 +21,8 @@ public class StringType extends BaseType {
     }
 
     @Override
-    public TypeName toTypeName(String targetPackage) {
-        return ClassName.get(String.class);
+    public PropertyModel toPropertyModel(boolean optional) {
+        return new PropertyModel(TypeModel.STRING, getName(), optional);
     }
 
     public Integer getMinLength() {

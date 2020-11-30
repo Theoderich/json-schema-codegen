@@ -1,0 +1,16 @@
+<component name="ProjectRunConfigurationManager">
+    <configuration default="false" name="JsonSchemaParser" type="Application" factoryName="Application">
+        <option name="MAIN_CLASS_NAME" value="de.theo.json.schema.codegen.parser.JsonSchemaParser"/>
+        <module name="parser"/>
+        <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/parser"/>
+        <extension name="coverage">
+            <pattern>
+                <option name="PATTERN" value="de.theo.json.schema.codegen.parser.*"/>
+                <option name="ENABLED" value="true"/>
+            </pattern>
+        </extension>
+        <method v="2">
+            <option name="Make" enabled="true"/>
+        </method>
+    </configuration>
+</component>

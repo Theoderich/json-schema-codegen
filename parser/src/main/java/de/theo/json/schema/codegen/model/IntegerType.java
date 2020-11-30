@@ -1,6 +1,7 @@
 package de.theo.json.schema.codegen.model;
 
-import com.squareup.javapoet.TypeName;
+import de.theo.json.schema.codegen.code.PropertyModel;
+import de.theo.json.schema.codegen.code.TypeModel;
 
 public class IntegerType extends NumberType {
     public IntegerType(String name, Integer multipleOf, Integer minimum, Integer exclusiveMinimum, Integer maximum, Integer exclusiveMaximum) {
@@ -8,8 +9,8 @@ public class IntegerType extends NumberType {
     }
 
     @Override
-    public TypeName toTypeName(String targetPackage) {
-        return TypeName.INT;
+    public PropertyModel toPropertyModel(boolean optional) {
+        return new PropertyModel(TypeModel.INTEGER, getName(), optional);
     }
 
     @Override

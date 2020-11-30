@@ -1,7 +1,8 @@
 package de.theo.json.schema.codegen.model;
 
 
-import com.squareup.javapoet.TypeName;
+import de.theo.json.schema.codegen.code.PropertyModel;
+import de.theo.json.schema.codegen.code.TypeModel;
 
 public class AnyType extends BaseType {
 
@@ -10,8 +11,8 @@ public class AnyType extends BaseType {
     }
 
     @Override
-    public TypeName toTypeName(String targetPackage) {
-        return TypeName.OBJECT;
+    public PropertyModel toPropertyModel(boolean optional) {
+        return new PropertyModel(TypeModel.REFERENCE, getName(), optional);
     }
 
     @Override

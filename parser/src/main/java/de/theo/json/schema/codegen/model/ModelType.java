@@ -1,9 +1,9 @@
 package de.theo.json.schema.codegen.model;
 
-import com.squareup.javapoet.JavaFile;
+import de.theo.json.schema.codegen.code.ClassModel;
 
 public interface ModelType {
 
-    JavaFile toJavaFile(String targetPackage);
+    ClassModel toClassModel();
 
 }

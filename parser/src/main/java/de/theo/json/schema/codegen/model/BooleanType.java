@@ -1,6 +1,7 @@
 package de.theo.json.schema.codegen.model;
 
-import com.squareup.javapoet.TypeName;
+import de.theo.json.schema.codegen.code.PropertyModel;
+import de.theo.json.schema.codegen.code.TypeModel;
 
 public class BooleanType extends BaseType {
     public BooleanType(String name) {
@@ -8,8 +9,9 @@ public class BooleanType extends BaseType {
     }
 
     @Override
-    public TypeName toTypeName(String targetPackage) {
-        return TypeName.BOOLEAN;
+    public PropertyModel toPropertyModel(boolean optional) {
+
+        return new PropertyModel(TypeModel.BOOLEAN, getName(), optional);
     }
 
     @Override
