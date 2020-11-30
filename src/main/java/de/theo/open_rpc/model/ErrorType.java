@@ -5,7 +5,7 @@ import de.theo.json.schema.codegen.parser.ParseException;
 
 import java.util.Map;
 
-public class ErrorType extends ErrorBaseType {
+public class ErrorType implements ErrorBaseType {
 
     private int errorCode;
     private String message;
@@ -22,6 +22,18 @@ public class ErrorType extends ErrorBaseType {
         if (this.data != null) {
             data.resolveReferences(refMap);
         }
+    }
+
+    public int getErrorCode() {
+        return errorCode;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public BaseType getData() {
+        return data;
     }
 
     @Override

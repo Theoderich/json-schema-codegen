@@ -47,11 +47,31 @@ public class OpenRpcDocument {
             error.resolveReferences(refMap, errorRefMap);
         }
         for (ContentBaseType contentType : contentTypes) {
-            contentType.resolveReferences(contentRefMap);
+            contentType.resolveReferences(refMap, contentRefMap);
         }
         for (MethodType method : methods) {
             method.resolveReferences(refMap, contentRefMap, errorRefMap);
         }
+    }
+
+    public InfoType getInfoType() {
+        return infoType;
+    }
+
+    public List<MethodType> getMethods() {
+        return methods;
+    }
+
+    public List<BaseType> getSchemas() {
+        return schemas;
+    }
+
+    public List<ErrorBaseType> getErrors() {
+        return errors;
+    }
+
+    public List<ContentBaseType> getContentTypes() {
+        return contentTypes;
     }
 
     @Override

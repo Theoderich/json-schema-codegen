@@ -28,9 +28,9 @@ public class MethodType {
     }
 
     public void resolveReferences(Map<String, BaseType> refMap, Map<String, ContentType> contentRefMap, Map<String, ErrorType> errorRefMap) throws ParseException {
-        result.resolveReferences(contentRefMap);
+        result.resolveReferences(refMap, contentRefMap);
         for (ContentBaseType param : params) {
-            param.resolveReferences(contentRefMap);
+            param.resolveReferences(refMap, contentRefMap);
         }
         for (ErrorBaseType error : errors) {
             error.resolveReferences(refMap, errorRefMap);
@@ -43,6 +43,34 @@ public class MethodType {
 
     public void addError(ErrorBaseType error) {
         this.errors.add(error);
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public String getSummary() {
+        return summary;
+    }
+
+    public List<ContentBaseType> getParams() {
+        return params;
+    }
+
+    public ContentBaseType getResult() {
+        return result;
+    }
+
+    public List<ErrorBaseType> getErrors() {
+        return errors;
+    }
+
+    public boolean isDeprecated() {
+        return deprecated;
     }
 
     @Override

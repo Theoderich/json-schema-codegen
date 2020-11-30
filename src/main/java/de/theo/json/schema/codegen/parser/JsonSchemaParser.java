@@ -24,7 +24,6 @@ import de.theo.json.schema.codegen.model.PatternType;
 import de.theo.json.schema.codegen.model.ReferenceType;
 import de.theo.json.schema.codegen.model.StringType;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.file.Paths;
@@ -41,7 +40,7 @@ public class JsonSchemaParser {
     private static final String SOURCE_SCHEMA = "/open-rpc-meta-schema.json";
     protected final Map<String, BaseType> refMap = new HashMap<>();
 
-    public static void main(String[] args) throws IOException, ParseException {
+    public static void main(String[] args) throws Exception {
         try (InputStream inputStream = JsonSchemaParser.class.getResourceAsStream(SOURCE_SCHEMA)) {
             JsonSchemaParser jsonSchemaParser = new JsonSchemaParser();
             JsonSchemaDocument parse = jsonSchemaParser.parse(inputStream);

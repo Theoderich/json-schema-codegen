@@ -1,8 +1,11 @@
 package de.theo.open_rpc.model;
 
 import de.theo.json.schema.codegen.model.BaseType;
+import de.theo.json.schema.codegen.parser.ParseException;
 
-public class ContentType extends ContentBaseType {
+import java.util.Map;
+
+public class ContentType implements ContentBaseType {
 
     private String name;
     private String description;
@@ -18,6 +21,43 @@ public class ContentType extends ContentBaseType {
         this.schema = schema;
         this.required = required;
         this.deprecated = deprecated;
+    }
+
+    @Override
+    public void resolveReferences(Map<String, BaseType> refMap, Map<String, ContentType> contentRefMap) throws ParseException {
+        if (schema != null) {
+            schema.resolveReferences(refMap);
+        }
+    }
+
+    @Override
+    public String getName() {
+        return name;
+    }
+
+    @Override
+    public String getDescription() {
+        return description;
+    }
+
+    @Override
+    public String getSummary() {
+        return summary;
+    }
+
+    @Override
+    public BaseType getSchema() {
+        return schema;
+    }
+
+    @Override
+    public boolean isRequired() {
+        return required;
+    }
+
+    @Override
+    public boolean isDeprecated() {
+        return deprecated;
     }
 
     @Override

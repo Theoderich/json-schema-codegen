@@ -5,7 +5,7 @@ import de.theo.json.schema.codegen.parser.ParseException;
 
 import java.util.Map;
 
-public class ErrorReferenceType extends ErrorBaseType {
+public class ErrorReferenceType implements ErrorBaseType {
 
     private final String reference;
     private ErrorType referencedObject;
@@ -23,11 +23,26 @@ public class ErrorReferenceType extends ErrorBaseType {
     }
 
     @Override
+    public int getErrorCode() {
+        return referencedObject.getErrorCode();
+    }
+
+    @Override
+    public String getMessage() {
+        return referencedObject.getMessage();
+    }
+
+    @Override
+    public BaseType getData() {
+        return referencedObject.getData();
+    }
+
+    @Override
     public String toString() {
         return "ErrorReferenceType{" +
                 "reference='" + reference + '\'' +
                 ", referencedObject=" + referencedObject +
-                "} " + super.toString();
+                "} ";
     }
 
     public String getReference() {

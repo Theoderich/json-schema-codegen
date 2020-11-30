@@ -7,6 +7,7 @@ import com.google.gson.JsonParser;
 import de.theo.json.schema.codegen.model.BaseType;
 import de.theo.json.schema.codegen.parser.JsonSchemaParser;
 import de.theo.json.schema.codegen.parser.ParseException;
+import de.theo.open_rpc.codegen.OpenRpcCodegenDefinition;
 import de.theo.open_rpc.model.ContentBaseType;
 import de.theo.open_rpc.model.ContentReferenceType;
 import de.theo.open_rpc.model.ContentType;
@@ -15,10 +16,16 @@ import de.theo.open_rpc.model.ErrorReferenceType;
 import de.theo.open_rpc.model.ErrorType;
 import de.theo.open_rpc.model.MethodType;
 import de.theo.open_rpc.model.OpenRpcDocument;
+import freemarker.template.Configuration;
+import freemarker.template.Template;
+import freemarker.template.TemplateExceptionHandler;
 
-import java.io.IOException;
+import java.io.BufferedWriter;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -30,11 +37,27 @@ public class OpenRpcParser extends JsonSchemaParser {
     private final Map<String, ErrorType> errorRefMap = new HashMap<>();
 
 
-    public static void main(String[] args) throws IOException, ParseException {
+    public static void main(String[] args) throws Exception {
         try (InputStream inputStream = JsonSchemaParser.class.getResourceAsStream(SOURCE_SCHEMA)) {
             OpenRpcDocument document = new OpenRpcParser().parseOpenRpcDocument(inputStream);
             System.out.println(document);
+            Configuration configuration = prepareFreemarkerConfig();
+            configuration.setClassForTemplateLoading(OpenRpcParser.class, "/templates");
+            Template template = configuration.getTemplate("server/spring/Api.ftl");
+
+            OpenRpcCodegenDefinition openRpcCodegenDefinition = new OpenRpcCodegenDefinition("de.theo.generated", document);
+            try (BufferedWriter writer = Files.newBufferedWriter(Paths.get("C:\\projects\\json-schema-codegen\\src\\main\\java\\Api.java"), StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING)) {
+                template.process(openRpcCodegenDefinition, writer);
+            }
+
         }
+    }
+
+    private static Configuration prepareFreemarkerConfig() {
+        Configuration configuration = new Configuration(Configuration.VERSION_2_3_30);
+        configuration.setDefaultEncoding("UTF-8");
+        configuration.setTemplateExceptionHandler(TemplateExceptionHandler.RETHROW_HANDLER);
+        return configuration;
     }
 
     public OpenRpcDocument parseOpenRpcDocument(InputStream inputStream) throws ParseException {
@@ -44,42 +67,15 @@ public class OpenRpcParser extends JsonSchemaParser {
         }
         JsonObject rootObject = jsonElement.getAsJsonObject();
         JsonObject info = getRequiredMemberAsObject(rootObject, "info");
-        JsonObject components = getOptionalMemberAsObject(rootObject, "components");
         JsonArray methods = getRequiredMemberAsArray(rootObject, "methods");
+        JsonObject components = getOptionalMemberAsObject(rootObject, "components");
 
         String title = getRequiredMemberAsString(info, "title");
         OpenRpcDocument openRpcDocument = new OpenRpcDocument(title);
 
         for (JsonElement methodArrayItem : methods) {
-            JsonObject methodObject = requireObject("methods ArrayElements", methodArrayItem);
-            String methodName = getRequiredMemberAsString(methodObject, "name");
-            String summary = getOptionalMemberAsString(methodObject, "summary");
-            String description = getOptionalMemberAsString(methodObject, "description");
-            boolean deprecated = getOptionalMemberAsBool(methodObject, "deprecated", false);
-            JsonArray params = getOptionalMemberAsArray(methodObject, "params");
-            JsonObject result = getRequiredMemberAsObject(methodObject, "result");
-            JsonArray errors = getOptionalMemberAsArray(methodObject, "errors");
-
-            ContentBaseType resultContent = parseContentTypeInline(result, "#/methods/" + methodName + "/result/");
-            MethodType methodType = new MethodType(methodName, description, summary, resultContent, deprecated);
-            if (errors != null) {
-                int errorIndex = 0;
-                for (JsonElement error : errors) {
-                    JsonObject errorObject = requireObject("errors ArrayElements", error);
-                    ErrorBaseType parsedError = parseErrorType(errorObject, "#/methods/" + methodName + "/errors/" + errorIndex);
-                    methodType.addError(parsedError);
-                    ++errorIndex;
-                }
-            }
-            if (params != null) {
-                for (JsonElement param : params) {
-                    JsonObject paramObject = requireObject("param ArrayElements", param);
-                    ContentBaseType parsedParam = parseContentTypeInline(paramObject, "#/methods/" + methodName + "/params");
-                    methodType.addParam(parsedParam);
-                }
-            }
-
-            openRpcDocument.addMethod(methodType);
+            MethodType parsedMethod = parseMethod(methodArrayItem);
+            openRpcDocument.addMethod(parsedMethod);
         }
 
         if (components != null) {
@@ -114,6 +110,37 @@ public class OpenRpcParser extends JsonSchemaParser {
         openRpcDocument.resolveReferences(refMap, contentRefMap, errorRefMap);
         return openRpcDocument;
 
+    }
+
+    private MethodType parseMethod(JsonElement methodArrayItem) throws ParseException {
+        JsonObject methodObject = requireObject("methods ArrayElements", methodArrayItem);
+        String methodName = getRequiredMemberAsString(methodObject, "name");
+        String summary = getOptionalMemberAsString(methodObject, "summary");
+        String description = getOptionalMemberAsString(methodObject, "description");
+        boolean deprecated = getOptionalMemberAsBool(methodObject, "deprecated", false);
+        JsonArray params = getOptionalMemberAsArray(methodObject, "params");
+        JsonObject result = getRequiredMemberAsObject(methodObject, "result");
+        JsonArray errors = getOptionalMemberAsArray(methodObject, "errors");
+
+        ContentBaseType resultContent = parseContentTypeInline(result, "#/methods/" + methodName + "/result");
+        MethodType methodType = new MethodType(methodName, description, summary, resultContent, deprecated);
+        if (errors != null) {
+            int errorIndex = 0;
+            for (JsonElement error : errors) {
+                JsonObject errorObject = requireObject("errors ArrayElements", error);
+                ErrorBaseType parsedError = parseErrorType(errorObject, "#/methods/" + methodName + "/errors/" + errorIndex);
+                methodType.addError(parsedError);
+                ++errorIndex;
+            }
+        }
+        if (params != null) {
+            for (JsonElement param : params) {
+                JsonObject paramObject = requireObject("param ArrayElements", param);
+                ContentBaseType parsedParam = parseContentTypeInline(paramObject, "#/methods/" + methodName + "/params");
+                methodType.addParam(parsedParam);
+            }
+        }
+        return methodType;
     }
 
     private ErrorBaseType parseErrorType(JsonObject errorObject, String errorRef) throws ParseException {
