@@ -71,7 +71,7 @@ public class GenerateCodeMojo extends AbstractMojo {
 
     private FreemarkerCodeGenerator getFreemarkerCodeGenerator() throws MojoExecutionException {
         try {
-            File freemarkerTemplatePath = new File(GenerateCodeMojo.class.getResource("/freemarker").toURI());
+            File freemarkerTemplatePath = new File(GenerateCodeMojo.class.getResource("/freemarker/java").toURI());
             return new FreemarkerCodeGenerator(Paths.get(targetFolder.toURI()), targetPackage, freemarkerTemplatePath);
         } catch (URISyntaxException | IOException e) {
             throw new MojoExecutionException("unable to load templates", e);

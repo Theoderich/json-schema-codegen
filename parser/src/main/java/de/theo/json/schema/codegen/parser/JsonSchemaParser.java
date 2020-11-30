@@ -30,6 +30,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.URISyntaxException;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -44,16 +46,17 @@ public class JsonSchemaParser {
     private static final String SOURCE_SCHEMA = "/open-rpc-meta-schema.json";
     private Map<String, BaseType> refMap = new HashMap<>();
 
-    public static void main(String[] args) throws IOException, ParseException, TemplateException {
+    public static void main(String[] args) throws IOException, ParseException, TemplateException, URISyntaxException {
         try (InputStream inputStream = JsonSchemaParser.class.getResourceAsStream(SOURCE_SCHEMA)) {
             JsonSchemaParser jsonSchemaParser = new JsonSchemaParser();
             JsonSchemaDocument parse = jsonSchemaParser.parse(inputStream);
             List<ClassModel> models = new CodeModelMapper().map(parse);
 
+            Path basePath = Paths.get(JsonSchemaParser.class.getResource("/").toURI());
             FreemarkerCodeGenerator javaCodeGenerator = new FreemarkerCodeGenerator(
-                    Paths.get("/home/andreas.janning/Projekt/json-schema-codegen/parser/target/generated-sources"),
-                    "de.theo.generated",
-                    new File("/home/andreas.janning/Projekt/json-schema-codegen/parser/src/main/resources/freemarker"));
+                    basePath.resolve("../generated-sources"),
+                    "de.qaware.generated",
+                    new File(JsonSchemaParser.class.getResource("/freemarker/java").toURI()));
             javaCodeGenerator.generateCode(models);
         }
     }
