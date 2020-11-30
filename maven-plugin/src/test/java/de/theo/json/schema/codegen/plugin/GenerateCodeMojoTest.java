@@ -45,4 +45,22 @@ public class GenerateCodeMojoTest extends AbstractMojoTestCase {
 
     }
 
+
+    public void testExecuteForCustom() throws Exception {
+
+        File testPom = new File(getBasedir(), "src/test/resources/test-pom-custom.xml");
+
+        GenerateCodeMojo lookup = (GenerateCodeMojo) lookupMojo("generate-code", testPom);
+        assertNotNull(lookup);
+
+        lookup.execute();
+
+        File outputPerson = new File(getBasedir(), "target/test/generated-sources/de/qaware/test/Person.mock");
+        assertTrue("Output should exist", outputPerson.exists());
+
+        File outputPet = new File(getBasedir(), "target/test/generated-sources/de/qaware/test/Pet.mock");
+        assertTrue("Output should exist", outputPet.exists());
+
+    }
+
 }

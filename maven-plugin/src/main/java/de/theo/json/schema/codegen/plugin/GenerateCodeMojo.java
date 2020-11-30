@@ -44,6 +44,9 @@ public class GenerateCodeMojo extends AbstractMojo {
     @Parameter(property = "language", defaultValue = "java")
     private String language;
 
+    @Parameter(property = "customTemplateFolder", defaultValue = "")
+    private File customTemplateFolder;
+
     public void execute() throws MojoExecutionException {
         // Use the group id as default target package
         if (StringUtils.isEmpty(targetPackage)) {
@@ -74,7 +77,12 @@ public class GenerateCodeMojo extends AbstractMojo {
 
     private FreemarkerCodeGenerator getFreemarkerCodeGenerator() throws MojoExecutionException {
         try {
-            File freemarkerTemplatePath = new File(GenerateCodeMojo.class.getResource("/freemarker/" + language).toURI());
+            File freemarkerTemplatePath;
+            if (language.equals("custom")) {
+                freemarkerTemplatePath = customTemplateFolder;
+            } else {
+                freemarkerTemplatePath = new File(GenerateCodeMojo.class.getResource("/freemarker/" + language).toURI());
+            }
             return new FreemarkerCodeGenerator(Paths.get(targetFolder.toURI()), targetPackage, freemarkerTemplatePath);
         } catch (URISyntaxException | IOException e) {
             throw new MojoExecutionException("unable to load templates", e);

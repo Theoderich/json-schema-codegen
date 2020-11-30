@@ -15,8 +15,7 @@
                     <targetPackage>de.qaware.test</targetPackage>
                     <sourceFolder>src/test/resources/json-schema</sourceFolder>
                     <targetFolder>target/test/generated-sources</targetFolder>
-                    <language>custom</language>
-                    <customTemplateFolder>src/test/resources/mock-template</customTemplateFolder>
+                    <language>typescript</language>
                 </configuration>
             </plugin>
         </plugins>
