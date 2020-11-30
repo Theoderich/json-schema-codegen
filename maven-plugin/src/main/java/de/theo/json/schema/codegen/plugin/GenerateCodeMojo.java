@@ -24,9 +24,9 @@ public class GenerateCodeMojo extends AbstractMojo {
     @Component
     private MavenProject project;
 
-    // The json schema file given by an absolute path or a path relative to the pom
-    @Parameter(defaultValue = "src/main/resources/json-schema.json", property = "sourceFile")
-    private File sourceFile;
+    // The folder containing the json schemas given by an absolute path or a path relative to the pom
+    @Parameter(defaultValue = "src/main/resources/json-schema", property = "sourceFolder")
+    private File sourceFolder;
 
     // The target folder for the generated code given by an absolute path or a path relative to the pom
     @Parameter(defaultValue = "target/generated/json-codegen", property = "targetFolder")
@@ -42,14 +42,23 @@ public class GenerateCodeMojo extends AbstractMojo {
             targetPackage = project.getGroupId();
         }
 
-        try (InputStream input = new FileInputStream(sourceFile)) {
-            JsonSchemaParser jsonSchemaParser = new JsonSchemaParser();
-            JsonSchemaDocument document = jsonSchemaParser.parse(input);
-            JavaCodeGenerator javaCodeGenerator = new JavaCodeGenerator(Paths.get(targetFolder.toURI()), targetPackage);
-            javaCodeGenerator.generateCode(document);
-        } catch (IOException | ParseException e) {
-            throw new MojoExecutionException("Unable to generate code, consult the errors and warnings printed above.", e);
+        File[] inputFiles = sourceFolder.listFiles();
+
+        if (inputFiles == null) {
+            throw new MojoExecutionException("Unable to process files from input directory.");
         }
+
+        for (File file : inputFiles) {
+            try (InputStream input = new FileInputStream(file)) {
+                JsonSchemaParser jsonSchemaParser = new JsonSchemaParser();
+                JsonSchemaDocument document = jsonSchemaParser.parse(input);
+                JavaCodeGenerator javaCodeGenerator = new JavaCodeGenerator(Paths.get(targetFolder.toURI()), targetPackage);
+                javaCodeGenerator.generateCode(document);
+            } catch (IOException | ParseException e) {
+                throw new MojoExecutionException("Unable to generate code, consult the errors and warnings printed above.", e);
+            }
+        }
+
     }
 
 }

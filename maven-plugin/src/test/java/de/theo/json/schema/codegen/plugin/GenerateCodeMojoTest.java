@@ -10,7 +10,7 @@ public class GenerateCodeMojoTest extends AbstractMojoTestCase {
         super.setUp();
     }
 
-    public void testName() throws Exception {
+    public void testExecute() throws Exception {
 
         File testPom = new File(getBasedir(), "src/test/resources/test-pom.xml");
 
@@ -19,8 +19,11 @@ public class GenerateCodeMojoTest extends AbstractMojoTestCase {
 
         lookup.execute();
 
-        File output = new File(getBasedir(), "target/test/generated-sources/de/qaware/test/Person.java");
-        assertTrue("Output should exist", output.exists());
+        File outputPerson = new File(getBasedir(), "target/test/generated-sources/de/qaware/test/Person.java");
+        assertTrue("Output should exist", outputPerson.exists());
+
+        File outputPet = new File(getBasedir(), "target/test/generated-sources/de/qaware/test/Pet.java");
+        assertTrue("Output should exist", outputPet.exists());
 
     }
 }

@@ -11,7 +11,7 @@
                 <artifactId>json-schema-codegen-maven-plugin</artifactId>
                 <configuration>
                     <targetPackage>de.qaware.test</targetPackage>
-                    <sourceFile>src/test/resources/test-schema.json</sourceFile>
+                    <sourceFolder>src/test/resources/json-schema</sourceFolder>
                     <targetFolder>target/test/generated-sources</targetFolder>
                 </configuration>
             </plugin>
