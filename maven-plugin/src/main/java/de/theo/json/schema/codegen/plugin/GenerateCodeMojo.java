@@ -1,4 +1,4 @@
-package de.the.json.schema.codegen.plugin;
+package de.theo.json.schema.codegen.plugin;
 
 import de.theo.json.schema.codegen.generator.JavaCodeGenerator;
 import de.theo.json.schema.codegen.model.JsonSchemaDocument;
