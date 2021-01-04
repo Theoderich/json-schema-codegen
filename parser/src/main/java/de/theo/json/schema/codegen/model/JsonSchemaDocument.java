@@ -39,8 +39,22 @@ public class JsonSchemaDocument {
 
     public List<BaseType> getAllTypes(){
         ArrayList<BaseType> result = new ArrayList<>(definitions);
-        result.add(0, rootClass);
+        if(rootClass != null) {
+            result.add(0, rootClass);
+        }
         return result;
+    }
+
+    public String getSchema() {
+        return schema;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public String getTitle() {
+        return title;
     }
 
     @Override

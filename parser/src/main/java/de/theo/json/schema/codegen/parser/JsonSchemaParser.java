@@ -65,6 +65,15 @@ public class JsonSchemaParser {
 
     public JsonSchemaDocument parse(InputStream in) throws ParseException {
         JsonElement jsonElement = JsonParser.parseReader(new InputStreamReader(in));
+        if(jsonElement.isJsonPrimitive() && jsonElement.getAsJsonPrimitive().isBoolean()){
+            JsonSchemaDocument jsonSchemaDocument = new JsonSchemaDocument(null, null, null);
+            if(jsonElement.getAsBoolean()){
+                jsonSchemaDocument.setRootClass(new AnyType("root"));
+            } else {
+                jsonSchemaDocument.setRootClass(null);
+            }
+            return jsonSchemaDocument;
+        }
         if (!jsonElement.isJsonObject()) {
             throw new ParseException("root element is not a JSON Object");
         }
