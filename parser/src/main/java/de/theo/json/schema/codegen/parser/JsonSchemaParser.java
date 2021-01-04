@@ -18,6 +18,7 @@ import de.theo.json.schema.codegen.model.DoubleType;
 import de.theo.json.schema.codegen.model.EnumType;
 import de.theo.json.schema.codegen.model.IntegerType;
 import de.theo.json.schema.codegen.model.JsonSchemaDocument;
+import de.theo.json.schema.codegen.model.NotType;
 import de.theo.json.schema.codegen.model.NullType;
 import de.theo.json.schema.codegen.model.ObjectType;
 import de.theo.json.schema.codegen.model.OneOf;
@@ -69,7 +70,7 @@ public class JsonSchemaParser {
         }
         JsonObject rootObject = jsonElement.getAsJsonObject();
 
-        String schema = getRequiredMemberAsString(rootObject, "$schema");
+        String schema = getOptionalMemberAsString(rootObject, "$schema");
         String id = getOptionalMemberAsString(rootObject, "$id");
         String title = getOptionalMemberAsString(rootObject, "title");
         JsonSchemaDocument jsonSchemaDocument = new JsonSchemaDocument(schema, id, title);
@@ -124,6 +125,11 @@ public class JsonSchemaParser {
             } else {
                 return new AllOf(title, types);
             }
+        }
+        if (title.equals("not") && element.isJsonObject()) {
+            JsonObject notElement = element.getAsJsonObject();
+            BaseType notType = parseDefinition(notElement, "", curRef);
+            return new NotType(title, notType);
         }
         JsonObject object = requireObject(title, element);
         if (object.has("type") && object.get("type").isJsonArray()) {
