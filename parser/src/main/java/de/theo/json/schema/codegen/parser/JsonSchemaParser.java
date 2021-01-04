@@ -108,6 +108,21 @@ public class JsonSchemaParser {
     }
 
     private BaseType parseDefinitionInternal(JsonElement element, String title, String curRef) throws ParseException {
+        if (element.isJsonObject()) {
+            JsonObject object = element.getAsJsonObject();
+            if (object.has("$defs")) {
+                JsonElement definitions = object.get("$defs");
+                for (Map.Entry<String, JsonElement> e : definitions.getAsJsonObject().entrySet()) {
+                    parseDefinition(e.getValue(), e.getKey(), curRef + "/$defs");
+                }
+            }
+            if (object.has("definitions")) {
+                JsonElement definitions = object.get("definitions");
+                for (Map.Entry<String, JsonElement> e : definitions.getAsJsonObject().entrySet()) {
+                    parseDefinition(e.getValue(), e.getKey(), curRef + "/definitions");
+                }
+            }
+        }
 
         if (title.equals("$ref") && element.isJsonPrimitive()) {
             String ref = requireString(title, element);
